@@ -1,63 +1,81 @@
-# Bill Nye / Science TV
+# Bill Nye TV
 
 ![Bill Nye TV identity](docs/brand/bill-nye-tv/readme-lockup.png)
 
-A standalone episode library and shared scheduled replay channel, built on the
-shared VHNESS engine. This repository owns its frontend, design system, assets,
-and deployment configuration. The viewer adapter and deployment helpers are
-pinned generated copies, verified against engine revision `1980c704e7495557c06fb9e6ac63e47ecc244dab`.
+An independent episode archive and replay channel for *Bill Nye the Science Guy*, styled as a 1990s classroom television. Pick an episode from the guide, or tune in to the shared replay schedule and watch what is already on.
 
-Both on-demand playback and Tune in/Rejoin use the same reviewed content and
-source attribution. Viewer controls never change the shared schedule. Original
-dates remain visible and archived programming is labeled as replay.
+This repository holds the viewer's frontend, design and deployment configuration. The catalog and API come from SUBCULT's shared archive engine, which runs as a pinned container image. The episodes come from an [Internet Archive collection](https://archive.org/details/billnyethescienceguythecompleteseries-07-28-2021); the deployment serves preserved copies of the source MP4 files.
 
-The design uses a 1990s science-TV cabinet, the supplied series logo, tactile controls, orbit graphics, a phosphor-style standby screen, and an optional picture effect. Native controls, captions where eligible, and original picture proportions remain readable. Reduced motion is respected. All 100 source MP4s total 13,763,456,996 bytes; preservation uses the owner-reviewed 16 GiB limit and 1 GiB reserve, with an independent NUC backup. AVI duplicates are not needed. Unknown episode dates stay unknown.
+Public site: https://bill-nye.subcult.tv/
 
-## Verify and build
+## Features
 
-Run `make verify` for adapter/tool/asset hashes, frozen dependencies,
-typecheck, lint, model tests, and production frontend build. Browser playback,
-audible fidelity, shared-channel drift, restore, and deployment remain distinct
-checks. Read `AGENTS.md` before changing generated code.
+- An episode guide in grid or table view, with metadata filters.
+- On-demand playback of any episode.
+- A shared replay channel. **Tune in** joins the program at its current position. Your controls never change the channel's schedule.
+- A television cabinet with a power button and an optional CRT picture effect. Episodes keep their original picture proportions.
+- Theater mode.
+- Share links by copying, by email or to Bluesky.
+- Favorites saved in your browser, with a separate favorites shelf.
+- Original broadcast dates where the source has them; unknown dates are shown as unknown.
 
-Build the pinned engine image from its source first, or load its verified image
-archive. Then build this app:
+Optional sign-in, saved preferences and a channel chat are built into the frontend but switched off in the standard deployment. Anonymous viewing does not need them.
+
+## Quick start
+
+Requirements: Node.js 24 and pnpm 10.33.0. The `@subcult` packages install from the registry set in [`web/.npmrc`](web/.npmrc).
 
 ```sh
-docker build --build-arg ENGINE_IMAGE=vhness-engine:1980c704e7495557c06fb9e6ac63e47ecc244dab \
-  -t bill-nye-tv:APP_SOURCE_SHA .
-python3 scripts/deploy.py prepare \
-  --root ~/.local/state/video-archive/bill-nye-tv --project bill-nye-tv \
-  --image bill-nye-tv:APP_SOURCE_SHA --collection bill-nye --port 48073
-python3 scripts/deploy.py start \
-  --root ~/.local/state/video-archive/bill-nye-tv --project bill-nye-tv \
-  --snapshot /absolute/reviewed/bill-nye-tv.dump
+pnpm --dir web install --frozen-lockfile
+pnpm --dir web dev
 ```
 
-Pass `--media ~/.local/state/vhness/private-pilot/media` to `prepare` on the verified primary host, or the corresponding independently verified restored media root on NUC. Do not move originals or expand preservation through deployment.
+Vite serves the app on port 5173 and proxies `/api` to `http://127.0.0.1:8080`. Set `VHNESS_API` to point it at another archive engine API.
 
-The helper creates separate private credentials and database state, binds to loopback, and restores snapshots only into an empty owned database. Public ingress remains a separate owner decision. Never reuse another product's secrets or reset an existing database.
+Checks:
 
-See [engine deployment operations](docs/engine-deployment.md) for source refresh, explicit private-library review, seven-day replay planning/renewal, preservation, and rollback. No host timers are installed automatically.
+```sh
+make verify   # engine and viewer pins, tool hashes, frozen install, typecheck, lint, tests, production build
+```
 
-## Assets and software license
+## Deploy
 
-This is an independent archive viewer, not an assertion of official affiliation. [Asset provenance](docs/asset-provenance.json) records supplied filenames and hashes. Software follows the engine's GPL-3.0 license; third-party logos, photography, and inspiration retain their separate provenance and are not assigned that software license. Public-release clearance remains separate. Runtime media, metadata snapshots, secrets, and generated evidence stay outside Git.
+[`deploy/core-compose.yml`](deploy/core-compose.yml) runs PostgreSQL, the archive engine API, this frontend and an `operator` profile for migrations and catalog commands. The frontend image is built from [`deploy/frontend.Dockerfile`](deploy/frontend.Dockerfile): nginx serving the static app and proxying `/api` to the engine.
 
-## Public core deployment
+```sh
+docker compose --env-file deploy/archive-core.env -f deploy/core-compose.yml up -d
+```
 
-The public site is live at https://bill-nye.subcult.tv/. The frontend remains
-owned here; the independently released headless core has its own reviewed update
-pin. See [public deployment and updates](docs/public-core-deployment.md).
+Set these before starting:
 
-The independent engine release and upgrade procedure is documented in
-[Shared engine release](docs/shared-core-release.md).
+| Variable | Purpose |
+| --- | --- |
+| `ARCHIVE_ENGINE_IMAGE` | Engine image, pinned by digest in [`deploy/archive-core.env`](deploy/archive-core.env) |
+| `FRONTEND_IMAGE` | Tag of the frontend image you built |
+| `COLLECTION` | Engine collection to serve (`bill-nye`) |
+| `MEDIA_ROOT` | Folder of preserved episode files, mounted read-only |
+| `SECRET_ROOT` | Folder holding the `database-password`, `database-url` and `operator-database-url` files |
+| `NPMRC_FILE` | npm configuration used while building the frontend image |
+| `WEB_PORT` | Loopback port for the frontend (default 8080) |
 
-## Brand assets
+Run the operator's `migrate` before the API, use a read-only database role for the public API, and put HTTPS in front of the frontend. [`deploy/community-compose.yml`](deploy/community-compose.yml) is an optional overlay that adds routing for accounts and chat; see [`docs/community.md`](docs/community.md).
 
-The product identity and selected public exports are recorded in [the brand handoff](docs/brand/bill-nye-tv/GUIDE.md) and [source hashes](docs/brand/bill-nye-tv/export.json). Regenerate from SUBCULT Studio with `python3 studio/scripts/export_remaining_brand.py bill-nye-tv /path/to/this/repository`; use `--check` to verify the export without writing.
+## Project layout
 
-## Automatic public frontend deployment
+```text
+web/       React and Vite frontend (built on @subcult/archive-viewer)
+deploy/    Compose files, nginx configuration, engine and viewer pins
+scripts/   Pin and hash checks, image build and deployment helpers
+docs/      Brand assets, asset provenance and deployment notes
+```
 
-The existing verification gate now builds frontend images on PRs and deploys
-verified main builds to the live Almaz frontend. See the [CI deployment and rollback procedure](docs/automatic-frontend-deployment.md).
+## Contributing
+
+- Bugs and feature requests: [GitHub issues](https://github.com/subculture-collective/bill-nye-tv/issues).
+- Code: pull requests on GitHub against `main`. CI runs `make verify` and builds the frontend image on every pull request. Both must pass.
+
+## License and rights
+
+The software is licensed under GPL-3.0. See [LICENSE](LICENSE).
+
+The episodes and the series logo belong to their owners and are not covered by the software license. [Asset provenance](docs/asset-provenance.json) records where the shipped logo came from. This is an independent archive viewer. It is not made or endorsed by Bill Nye or the series' producers.
