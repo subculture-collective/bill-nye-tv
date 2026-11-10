@@ -61,8 +61,16 @@ jobs:
           d="$RUNNER_TEMP/deploy"
           ssh_args=(-F /dev/null -i "$d/key" -o ControlPath=none -o ControlMaster=no -o BatchMode=yes -o IdentitiesOnly=yes
             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$d/known_hosts" -o ConnectTimeout=15 "$TARGET")
-          # shellcheck disable=SC2029
-          ssh "${ssh_args[@]}" "artifact $DEPLOY_REVISION bill-nye-reference" > "$d/artifact.json"
+          # The receiver deploys only Gitea's current main. Kvant copies GitHub
+          # to Gitea every minute, so wait while the revision has not arrived.
+          for attempt in $(seq 1 20); do
+            # shellcheck disable=SC2029
+            if ssh "${ssh_args[@]}" "artifact $DEPLOY_REVISION bill-nye-reference" > "$d/artifact.json" 2> "$d/err"; then break; fi
+            if grep -q "no longer the current main" "$d/err" && [ "$attempt" -lt 20 ]; then
+              echo "Gitea has not received $DEPLOY_REVISION yet; waiting 30 s ($attempt/20)"; sleep 30; continue
+            fi
+            cat "$d/err" >&2; exit 1
+          done
           python3 - "$d/artifact.json" "$GITHUB_OUTPUT" <<'PYCODE'
           import json, re, sys
           from pathlib import Path
