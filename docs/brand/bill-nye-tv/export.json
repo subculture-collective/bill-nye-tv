@@ -1,78 +1,78 @@
 {
   "studio_repository": "subculture-collective/subcult-tv",
-  "studio_revision": "6907e56c181949c1d99064dbc38ae9fe660a66d0",
+  "studio_revision": "86b9074be800ae060f239795f6ce2495bb9fff0e",
   "brand": "bill-nye-tv",
   "files": [
     {
       "source": "studio/brands/bill-nye-tv/GUIDE.md",
       "target": "docs/brand/bill-nye-tv/GUIDE.md",
-      "sha256": "407475ecf376757f5176e02fd2f3612b1d0f32815d6bd06b948f82f71e4f16d3",
+      "sha256": "d40b7c9bf07768106fd437352672638db1a84aaa9be871f7354e941454ddb525",
       "transformation": "unchanged copy"
     },
     {
       "source": "studio/brands/bill-nye-tv/product/readme-lockup.png",
       "target": "docs/brand/bill-nye-tv/readme-lockup.png",
-      "sha256": "a42d59d4e37bf8253355d5363659c14003ac4a01531f970c6ee4417d2ca2894d",
+      "sha256": "0070b542300b28aee4d7177df49b8fcad79477b4c4f2e775580cd326c531d596",
       "transformation": "unchanged copy"
     },
     {
       "source": "studio/brands/bill-nye-tv/social/avatar.png",
       "target": "docs/brand/bill-nye-tv/avatar.png",
-      "sha256": "626bf3047b83800597f98ef3a847d0dcab62da964b66c3f710f97e992e416d61",
+      "sha256": "6609c1d75210d3bce71662db1d2f29731dddf64c075c01e58e3bccd205e6ebeb",
       "transformation": "unchanged copy"
     },
     {
       "source": "studio/brands/bill-nye-tv/product/favicon.svg",
       "target": "web/public/brand/bill-nye-tv/favicon.svg",
-      "sha256": "dc1226b297c1f25c386227633fc18c2ef8b23bbef4bc1a0d1a56a7ff49b6d505",
+      "sha256": "a35545698c1d7601fbebc28261a0da5111a75631baf020f3c6793c8681a27cda",
       "transformation": "unchanged copy"
     },
     {
       "source": "studio/brands/bill-nye-tv/product/favicon.ico",
       "target": "web/public/brand/bill-nye-tv/favicon.ico",
-      "sha256": "6a79a0703585db4c86bef1de35e78375ced3a163903269cfb8405b06896cef80",
+      "sha256": "5f5e407edb5c72e64cb7fe5434fc686fb0954082a06285bda1f33e0986de95cb",
       "transformation": "unchanged copy"
     },
     {
       "source": "studio/brands/bill-nye-tv/product/apple-touch-icon.png",
       "target": "web/public/brand/bill-nye-tv/apple-touch-icon.png",
-      "sha256": "98a3b4385db98a9ab912c7f42a62e0cf54eb60ce2c8d94ff8ed0401b1fac6c44",
+      "sha256": "664a209a345dba3216586435990867295e84a4aa9017b0c3569fd9f3da33933b",
       "transformation": "unchanged copy"
     },
     {
       "source": "studio/brands/bill-nye-tv/product/og.png",
       "target": "web/public/brand/bill-nye-tv/og.png",
-      "sha256": "4faee167ea930f7d4d1ceaac75906dde33669c7b5d957a0f8454756691d150e0",
+      "sha256": "3978d59e656556f4aba8750d65264057d064dbd7c962851b85f96b5725058dd7",
       "transformation": "unchanged copy"
     },
     {
       "source": "studio/brands/bill-nye-tv/product/mark.svg",
       "target": "web/public/brand/bill-nye-tv/mark.svg",
-      "sha256": "7b502b742b0c0e7fe9075f0d70e34e42e042162f4a2ffc1b6a2a5fd44a7ee7c5",
+      "sha256": "ae773e35a5c1ec85abe6e91ff29bd27deaa83bcdcb75d2fb86287a0660d18647",
       "transformation": "unchanged copy"
     },
     {
       "source": "studio/brands/bill-nye-tv/product/favicon.svg",
       "target": "web/public/favicon.svg",
-      "sha256": "dc1226b297c1f25c386227633fc18c2ef8b23bbef4bc1a0d1a56a7ff49b6d505",
+      "sha256": "a35545698c1d7601fbebc28261a0da5111a75631baf020f3c6793c8681a27cda",
       "transformation": "unchanged copy"
     },
     {
       "source": "studio/brands/bill-nye-tv/product/favicon.ico",
       "target": "web/public/favicon.ico",
-      "sha256": "6a79a0703585db4c86bef1de35e78375ced3a163903269cfb8405b06896cef80",
+      "sha256": "5f5e407edb5c72e64cb7fe5434fc686fb0954082a06285bda1f33e0986de95cb",
       "transformation": "unchanged copy"
     },
     {
       "source": "studio/brands/bill-nye-tv/product/apple-touch-icon.png",
       "target": "web/public/apple-touch-icon.png",
-      "sha256": "98a3b4385db98a9ab912c7f42a62e0cf54eb60ce2c8d94ff8ed0401b1fac6c44",
+      "sha256": "664a209a345dba3216586435990867295e84a4aa9017b0c3569fd9f3da33933b",
       "transformation": "unchanged copy"
     },
     {
       "source": "studio/brands/bill-nye-tv/product/og.png",
       "target": "web/public/og.png",
-      "sha256": "4faee167ea930f7d4d1ceaac75906dde33669c7b5d957a0f8454756691d150e0",
+      "sha256": "3978d59e656556f4aba8750d65264057d064dbd7c962851b85f96b5725058dd7",
       "transformation": "unchanged copy"
     }
   ]
