@@ -1,10 +1,13 @@
 # Automatic public frontend deployment
 
-The native Gitea `verify` workflow runs the existing full repository verification,
-then builds deployable images on PRs and main. PR image builds receive no registry
-or deployment credentials. Main pushes and manual dispatches of main publish the
-verified images through the existing organization registry credential, then
-stream the same frontend image to the existing Almaz service.
+On GitHub, the `Mirror CI` workflow runs the full repository verification
+(`make verify`) for every pull request branch, then builds the frontend image
+and checks its nginx configuration. Those builds receive no registry or
+deployment credentials. Pushes and manual dispatches of main run the `Deploy`
+workflow: it joins the tailnet, builds the image, publishes it to GitHub
+Packages with the workflow token, then streams the same frontend image to the
+existing Almaz service. The Gitea `verify` workflow only repeats `make verify`
+on main after Kvant copies it there.
 
 This app uses Compose service `bill-nye-reference`, container `arkhiv-platform-public-20261004-bill-nye-reference-1`, at
 https://bill-nye.subcult.tv/. Deployment uses this repository's dedicated `HOMELAB_DEPLOY_KEY` and
@@ -35,5 +38,7 @@ guard, so it can deploy without reading sibling services’ private env files.
 
 Before building on main, CI queries the receiver for an already accepted image
 for that exact commit. A retry reuses that immutable image and its public HTML
-hash, skipping image rebuild/publication. PRs still build and run the nginx
-configuration check; the existing verification gate also remains on every run.
+hash, skipping image rebuild/publication. The receiver deploys only the
+revision that is Gitea's current main, so the job waits up to ten minutes for
+the copy from GitHub to arrive. PRs still build and run the nginx
+configuration check, and the `Mirror CI gate` check is required to merge.
