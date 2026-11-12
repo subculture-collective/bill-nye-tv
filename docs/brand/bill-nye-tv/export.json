@@ -1,12 +1,12 @@
 {
   "studio_repository": "subculture-collective/subcult-tv",
-  "studio_revision": "86b9074be800ae060f239795f6ce2495bb9fff0e",
+  "studio_revision": "9f09c6016217c0f0c2b59012f85492d836209242",
   "brand": "bill-nye-tv",
   "files": [
     {
       "source": "studio/brands/bill-nye-tv/GUIDE.md",
       "target": "docs/brand/bill-nye-tv/GUIDE.md",
-      "sha256": "d40b7c9bf07768106fd437352672638db1a84aaa9be871f7354e941454ddb525",
+      "sha256": "04996a42640253b6ca78648be8df41ce61fa72aa0b2a90f9a8ec9f5542c86e64",
       "transformation": "unchanged copy"
     },
     {

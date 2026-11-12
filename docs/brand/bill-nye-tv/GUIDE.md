@@ -2,7 +2,7 @@
 
 Bill Nye TV: An independent archive of Bill Nye programs, with source links and scheduled replays.
 
-Status: Proposed on November 12, 2026 after a review found the earlier Lab reel pack (cream and dark green, a flask in a film frame) unrelated to the live site. This pack follows the site's television identity instead. It is an agent proposal awaiting owner review; the owner has not decided whether the site header keeps the program's logo or uses this mark. Sample social layouts remain unapproved for publication.
+Status: Proposed on November 12, 2026 after a review found the earlier Lab reel pack (cream and dark green, a flask in a film frame) unrelated to the live site. This pack follows the site's television identity instead. The mark and palette are an agent proposal awaiting owner review. On November 12, 2026 the owner decided that the site header keeps the program's own logo; this mark is for the browser icon, touch icon, link preview, footer credit and Studio artwork. Sample social layouts remain unapproved for publication.
 
 ## Mark
 
