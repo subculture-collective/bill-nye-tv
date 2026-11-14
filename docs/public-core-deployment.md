@@ -1,7 +1,7 @@
 # Public deployment and independent updates
 
 The public site at https://bill-nye.subcult.tv/ serves 100 reviewed programs
-through the independently published Arkhiv core 0.1.1. Its scope is
+through the independently published Arkhiv core 0.4.8. Its scope is
 `bill-nye`. The existing distinct frontend belongs to this repository.
 
 `deploy/archive-core.env` and `deploy/core-release.json` record the immutable
@@ -29,3 +29,29 @@ Machinum and the deployment's private qualification directory.
 
 Bill Nye serves the 100 previously approved local MP4 originals. The public
 rollout reused their verified copies without acquiring replacement media.
+
+## Core 0.4.8 and episode thumbnails, 2026-11-14
+
+The public API moved from core 0.1.1 to 0.4.8 (source `0b270c3`, digest
+`sha256:869a7309d0d7…`). Core 0.3.0 through 0.4.7 could not serve this catalog:
+their listing query took about 2 seconds of the 3-second request deadline, and
+every listing returned 503 in a rehearsal on a copy of this database. Core 0.4.8
+reads only this collection and reuses listing summaries for 30 seconds; public
+listings now take about 0.2 seconds through Cloudflare.
+
+The rollout took a fresh database checkpoint, ran migrations 0010–0022 as the
+operator, granted the SELECT-only public role read access to all tables (it has
+no default privileges, so the new tables needed this), and recreated only this
+API service. On Almaz the two video cores now read `VIDEO_CORE_IMAGE` from the
+Compose `.env` instead of the shared `ARCHIVE_ENGINE_IMAGE`; the previous
+`compose.json`, `.env` and container state are kept with the checkpoint in the
+operator's private state directory. To roll back, set `VIDEO_CORE_IMAGE` to the
+0.1.1 digest `sha256:cb44da0d015a…` and recreate only this service; the
+migrations are additive and 0.1.1 ignores the new tables and artwork reviews.
+
+Each of the 100 episodes now has a reviewed artwork decision pointing at one of
+the frame thumbnails Internet Archive derived from that episode's own video
+(linked by the source inventory's `original` field, not by filename). The frame
+is the one about a quarter of the way through, skipping frames under 8,000 or
+over 70,000 bytes, which are blank, black or static. "26 Food Web" uses a
+hand-picked frame. The library cards and player poster show these images.
