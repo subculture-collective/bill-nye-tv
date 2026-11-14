@@ -7,10 +7,10 @@ run-name: Deploy ${{ github.sha }}
 # only for the bill-nye-tv fleet-deploy receiver.
 #
 # When the pinned core version (deploy/core-release.json) differs from the
-# core_version that bill-nye.subcult.tv reports, when a push changes
-# deploy/core.Dockerfile, or when a manual run asks for it, the core job first
-# deploys the pinned core through the separate bill-nye-tv-core receiver profile
-# and its own key. It stays off until the repository variable
+# core_version that bill-nye.subcult.tv reports, when deploy/core.Dockerfile
+# changed since the last successful run, or when a manual run asks for it, the
+# core job first deploys the pinned core through the separate bill-nye-tv-core
+# receiver profile and its own key. It stays off until the repository variable
 # CORE_DEPLOY_ENABLED is 'true', which the operator sets after registering that
 # profile (docs/public-core-deployment.md). Other runs deploy only the web image.
 'on':
@@ -44,6 +44,10 @@ jobs:
     if: github.repository == 'subculture-collective/bill-nye-tv' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 5
+    permissions:
+      contents: read
+      # Reads this workflow's last successful run (gh run list).
+      actions: read
     outputs:
       core: ${{ steps.core.outputs.core }}
     steps:
@@ -57,6 +61,7 @@ jobs:
           BEFORE: ${{ github.event.before }}
           DISPATCH_CORE: ${{ inputs.deploy_core }}
           ENABLED: ${{ vars.CORE_DEPLOY_ENABLED }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           core=false
@@ -81,16 +86,26 @@ jobs:
             # The next push or a manual run with deploy_core catches up.
             echo "::warning title=Live core version unknown::Could not read https://bill-nye.subcult.tv/api/version, so the core is not deployed. Rerun, or run the workflow on main with deploy_core."
           fi
-          if [ "$EVENT" = workflow_dispatch ]; then
-            if [ "$DISPATCH_CORE" = true ]; then core=true; fi
+          if [ "$EVENT" = workflow_dispatch ] && [ "$DISPATCH_CORE" = true ]; then core=true; fi
+          # A wrapper change needs a new core image even when the version
+          # matches. Compare with the head of the last successful run of this
+          # workflow: a run refused because a newer commit reached main, or
+          # cancelled while queued, never succeeds, so its wrapper change
+          # carries forward to the next run. Without a usable earlier success,
+          # compare the pushed range, or the parent when that is unknown.
+          base=$(git rev-parse "$DEPLOY_REVISION^")
+          if [ -n "$BEFORE" ] && git cat-file -e "$BEFORE^{commit}" 2>/dev/null \
+            && git merge-base --is-ancestor "$BEFORE" "$DEPLOY_REVISION"; then base=$BEFORE; fi
+          if last=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow deploy.yml --branch main \
+            --status success --limit 1 --json headSha --jq '.[0].headSha // ""') \
+            && [ -n "$last" ] && git cat-file -e "$last^{commit}" 2>/dev/null \
+            && git merge-base --is-ancestor "$last" "$DEPLOY_REVISION"; then
+            base=$last
           else
-            # A wrapper change needs a new core image even when the version
-            # matches. Compare the whole pushed range; fall back to the parent
-            # when the previous head is unknown (new branch or rewritten history).
-            base=$(git rev-parse "$DEPLOY_REVISION^")
-            if [ -n "$BEFORE" ] && git cat-file -e "$BEFORE^{commit}" 2>/dev/null \
-              && git merge-base --is-ancestor "$BEFORE" "$DEPLOY_REVISION"; then base=$BEFORE; fi
-            if ! git diff --quiet "$base" "$DEPLOY_REVISION" -- deploy/core.Dockerfile; then core=true; fi
+            echo "::warning title=Last successful deploy unknown::Comparing deploy/core.Dockerfile with $base only."
+          fi
+          if ! git diff --quiet "$base" "$DEPLOY_REVISION" -- deploy/core.Dockerfile; then
+            echo "deploy/core.Dockerfile changed since $base"; core=true
           fi
           if [ "$core" = true ] && [ "$ENABLED" != true ]; then
             echo "::warning title=Core not deployed::The pinned core differs from the live one, but CORE_DEPLOY_ENABLED is not 'true'. Deploy the core by hand (docs/public-core-deployment.md)."
