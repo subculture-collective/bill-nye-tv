@@ -37,6 +37,8 @@ env:
   IMAGE: ghcr.io/subculture-collective/bill-nye-tv-frontend
   DEPLOY_REVISION: ${{ github.sha }}
   CORE_PROFILE: bill-nye-tv-core
+  # The receiver profile's service is the live Compose service name.
+  CORE_SERVICE: bill-core
 
 jobs:
   changes:
@@ -154,7 +156,7 @@ jobs:
       - name: Build the labelled core wrapper
         run: |
           set -euo pipefail
-          tag="fleet-deploy/$CORE_PROFILE/core:$DEPLOY_REVISION"
+          tag="fleet-deploy/$CORE_PROFILE/$CORE_SERVICE:$DEPLOY_REVISION"
           # An empty context: the wrapper cannot copy anything into the image.
           context=$(mktemp -d)
           DOCKER_BUILDKIT=1 docker build -f deploy/core.Dockerfile --pull=false \
@@ -202,7 +204,7 @@ jobs:
           # to Gitea every minute, so wait while the revision has not arrived.
           for attempt in $(seq 1 20); do
             # shellcheck disable=SC2029
-            if ssh "${ssh_args[@]}" "artifact $DEPLOY_REVISION core" > "$d/artifact.json" 2> "$d/err"; then break; fi
+            if ssh "${ssh_args[@]}" "artifact $DEPLOY_REVISION $CORE_SERVICE" > "$d/artifact.json" 2> "$d/err"; then break; fi
             if grep -q "no longer the current main" "$d/err" && [ "$attempt" -lt 20 ]; then
               echo "Gitea has not received $DEPLOY_REVISION yet; waiting 30 s ($attempt/20)"; sleep 30; continue
             fi
@@ -214,7 +216,7 @@ jobs:
             echo "The receiver already holds the core image for $DEPLOY_REVISION; reusing it"
           else
             # shellcheck disable=SC2029
-            docker save "fleet-deploy/$CORE_PROFILE/core:$DEPLOY_REVISION" | ssh "${ssh_args[@]}" "receive $DEPLOY_REVISION core" 2> "$d/err" || refused receive
+            docker save "fleet-deploy/$CORE_PROFILE/$CORE_SERVICE:$DEPLOY_REVISION" | ssh "${ssh_args[@]}" "receive $DEPLOY_REVISION $CORE_SERVICE" 2> "$d/err" || refused receive
           fi
           # Backup, migrate, activation, checks and any rollback happen on the
           # host. A rollback or refusal exits non-zero and fails this job.
