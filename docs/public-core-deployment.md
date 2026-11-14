@@ -1,7 +1,7 @@
 # Public deployment and independent updates
 
 The public site at https://bill-nye.subcult.tv/ serves 100 reviewed programs
-through the independently published Arkhiv core 0.4.8. Its scope is
+through the independently published Arkhiv core 0.4.9. Its scope is
 `bill-nye`. The existing distinct frontend belongs to this repository.
 
 `deploy/archive-core.env` and `deploy/core-release.json` record the immutable
@@ -55,3 +55,8 @@ the frame thumbnails Internet Archive derived from that episode's own video
 is the one about a quarter of the way through, skipping frames under 8,000 or
 over 70,000 bytes, which are blank, black or static. "26 Food Web" uses a
 hand-picked frame. The library cards and player poster show these images.
+
+Core 0.4.9 (2026-11-14, same migrations as 0.4.8) adds `community` to
+`/api/version`; this instance reports accounts and chat off. Viewer 0.4.8 reads
+that and no longer requests the account session or polls the chat room, which
+had logged a 404 in the browser console on every page.
